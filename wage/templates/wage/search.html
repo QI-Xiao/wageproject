@@ -1,0 +1,62 @@
+{% extends 'wage/base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+<br />
+<br />
+<br />
+<h4>搜索结果</h4>
+
+<div class="table-responsive">
+    <form action="{% url 'wage:calculate' %}" method="post">
+    {% csrf_token %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>顾客</th>
+                <th>金额</th>
+                <th>提成</th>
+                <th>订单类型</th>
+                <th>预定时间</th>
+                <th>婚礼时间</th>
+                <th>任务单</th>
+                <th>活动单</th>
+                <th>退单</th>
+                <th>订单状态</th>
+                <th>店员</th>
+                <th>订单号</th>
+                <th>已被计入</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for order in order_matched %}
+            <tr>
+                <th>{{ order.client_name }}</th>
+                <th>{{ order.money }}</th>
+                <th>{{ order.commission_rate }}</th>
+                <th>{{ order.get_type_display }}</th>
+                <th>{{ order.order_time }}</th>
+                <th>{{ order.wedding_time }}</th>
+                <th>{{ order.is_task_order }}</th>
+                <th>{{ order.is_discount_order }}</th>
+                <th>{{ order.is_chargeback }}</th>
+                <th>{{ order.get_status_display }}</th>
+                <th>{{ order.whose_order }}</th>
+                <th>{{ order.order_number }}</th>
+                <th>{{ order.calculated }}</th>
+                {% if order.status != 3 %}{% if order.status != 4 %}<th><input type="radio" name="chargeback" value="{{ order.order_number }}" /></th>{% endif %}{% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if order_matched %}<input type="submit" value="退单" />{% endif %}
+    </form>
+</div>
+
+{% if inf_message %}
+    <h4>{{ inf_message }}</h4>
+{% endif %}
+
+{% endblock %}

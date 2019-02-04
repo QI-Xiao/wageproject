@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>工资结算</title>
+<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+{% block head %}
+{% endblock %}
+
+</head>
+
+<body>
+
+<div class="calendar">
+  <div class="title">
+    <h1 class="green" id="calendar-month">{{month}}</h1>
+    <h2 class="green" id="calendar-year">{{year}}</h2>
+    <a href="" id="prev">Prev Month</a>
+    <a href="" id="next">Next Month</a>
+  </div>
+</div>
+
+<script>
+var month_name = ["January","Febrary","March","April","May","June","July","Auguest","September","October","November","December"];
+var prev = document.getElementById("prev");
+var next = document.getElementById("next");
+var cmonth = document.getElementById("calendar-month");
+var cyear = document.getElementById("calendar-year");
+
+var my_year = document.getElementById("calendar-year").innerHTML;
+var my_month = document.getElementById("calendar-month").innerHTML - 1;
+
+function refreshDate(){
+	cmonth.innerHTML = month_name[my_month]; //设置英文月份显示
+	cyear.innerHTML = my_year; //设置年份显示
+}
+refreshDate();
+prev.onclick = function(e){
+	e.preventDefault();
+	my_month--;
+	if(my_month<0){
+		my_year--;
+		my_month = 11;
+	}
+	refreshDate();
+    $.get("", {
+        "my_month": my_month,
+        "my_year": my_year,
+        }, function(data, status){
+        if (status == "success"){
+        console.log('前一月');
+        window.location.reload();
+        }
+    });
+}
+next.onclick = function(e){
+	e.preventDefault();
+	my_month++;
+	if(my_month>11){
+		my_year++;
+		my_month = 0;
+	}
+	refreshDate();
+	    $.get("", {
+        "my_month": my_month,
+        "my_year": my_year,
+        }, function(data, status){
+        if (status == "success"){
+        console.log('后一月');
+        window.location.reload();
+        }
+    });
+}
+</script>
+
+{% block body %}
+{% endblock %}
+</body>
+</html>

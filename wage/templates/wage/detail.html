@@ -1,0 +1,131 @@
+{% extends 'wage/base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+<h2>当月工资</h2>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>日期</th>
+                <th>店员</th>
+                <th>底薪</th>
+                <th>完成任务单</th>
+                <th>总任务单</th>
+                <th>当月订单提成</th>
+                <th>以往留存提成</th>
+                <th>带徒弟提成</th>
+                <th>店长提成</th>
+                <th>退单</th>
+                <th>额外调整</th>
+                <th>总金额</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>{{ onemoney.month }}</th>
+                <th>{{ onemoney.whose_salary }}</th>
+                <th>{{ onemoney.base_salary }}</th>
+                <th>{{ onemoney.task_finished }}</th>
+                <th>{{ onemoney.whose_salary.task_quantity }}</th>
+                <th>{{ onemoney.commission_current|floatformat:1 }}</th>
+                <th>{{ onemoney.commission_before|floatformat:1 }}</th>
+                <th>{{ onemoney.commission_passive|floatformat:1 }}</th>
+                <th>{{ onemoney.commission_shop_manager|floatformat:1 }}</th>
+                <th>{{ onemoney.commission_minus|floatformat:1 }}</th>
+                <th>{{ onemoney.other_salary|floatformat:1 }}</th>
+                <th>{{ onemoney.total_salary|floatformat:1 }}</th>
+                <th>{{ onemoney.pk }}</th>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<h2>详细记录</h2>
+
+<h4>本月新增订单</h4>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>顾客</th>
+                <th>金额</th>
+                <th>提成</th>
+                <th>订单类型</th>
+                <th>预定时间</th>
+                <th>婚礼时间</th>
+                <th>任务单</th>
+                <th>活动单</th>
+                <th>退单</th>
+                <th>订单状态</th>
+                <th>店员</th>
+                <th>订单号</th>
+                <th>已被计入</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for order in ordersnew %}
+            <tr>
+                <th>{{ order.client_name }}{% if order in orderswed %} (本月结婚){% endif %}</th>
+                <th>{{ order.money }}</th>
+                <th>{{ order.commission_rate }}</th>
+                <th>{{ order.get_type_display }}</th>
+                <th>{{ order.order_time }}</th>
+                <th>{{ order.wedding_time }}</th>
+                <th>{{ order.is_task_order }}</th>
+                <th>{{ order.is_discount_order }}</th>
+                <th>{{ order.is_chargeback }}</th>
+                <th>{{ order.get_status_display }}</th>
+                <th>{{ order.whose_order }}</th>
+                <th>{{ order.order_number }}</th>
+                <th>{{ order.calculated }}</th>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h4>本月结婚订单</h4>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>顾客</th>
+                <th>金额</th>
+                <th>提成</th>
+                <th>订单类型</th>
+                <th>预定时间</th>
+                <th>婚礼时间</th>
+                <th>任务单</th>
+                <th>活动单</th>
+                <th>退单</th>
+                <th>订单状态</th>
+                <th>店员</th>
+                <th>订单号</th>
+                <th>已被计入</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for order in orderswed %}
+            <tr>
+                <th>{{ order.client_name }}{% if order in ordersnew %} (本月新增){% endif %}</th>
+                <th>{{ order.money }}</th>
+                <th>{{ order.commission_rate }}</th>
+                <th>{{ order.get_type_display }}</th>
+                <th>{{ order.order_time }}</th>
+                <th>{{ order.wedding_time }}</th>
+                <th>{{ order.is_task_order }}</th>
+                <th>{{ order.is_discount_order }}</th>
+                <th>{{ order.is_chargeback }}</th>
+                <th>{{ order.get_status_display }}</th>
+                <th>{{ order.whose_order }}</th>
+                <th>{{ order.order_number }}</th>
+                <th>{{ order.calculated }}</th>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

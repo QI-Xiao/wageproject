@@ -1,0 +1,71 @@
+{% extends 'wage/base.html' %}
+
+{% block head %}
+<script>
+
+function newDoc(elem){
+    var data = parseInt(elem.getAttribute('value'));
+    var url_mask = "www.baidu.com";
+    window.location.assign(data)
+    }
+
+    function toaaadetail(elem){
+    window.location.href("{% url 'wage:detail' 5 %}")
+    }
+</script>
+
+{% endblock %}
+
+{% block body %}
+<h2>当月工资</h2>
+
+{% if inf_message %}
+    <h5>{{ inf_message }}</h5>
+{% endif %}
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>日期</th>
+                <th>店员</th>
+                <th>底薪</th>
+                <th>完成任务单</th>
+                <th>总任务单</th>
+                <th>当月订单提成</th>
+                <th>以往留存提成</th>
+                <th>带徒弟提成</th>
+                <th>店长提成</th>
+                <th>退单</th>
+                <th>额外调整</th>
+                <th>总金额</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for onemoney in monthlymoney %}
+            <tr value="{{ onemoney.id }}" onclick="newDoc(this)">
+                <th>{{ onemoney.month }}</th>
+                <th>{{ onemoney.whose_salary }}</th>
+                <th>{{ onemoney.base_salary }}</th>
+                <th>{{ onemoney.task_finished }}</th>
+                <th>{{ onemoney.whose_salary.task_quantity }}</th>
+                <th>{{ onemoney.commission_current|floatformat:1 }}</th>
+                <th>{{ onemoney.commission_before|floatformat:1 }}</th>
+                <th>{{ onemoney.commission_passive|floatformat:1 }}</th>
+                <th>{{ onemoney.commission_shop_manager|floatformat:1 }}</th>
+                <th>{{ onemoney.commission_minus|floatformat:1 }}</th>
+                <th>{{ onemoney.other_salary|floatformat:1 }}</th>
+                <th>{{ onemoney.total_salary|floatformat:1 }}</th>
+                <th>{{ onemoney.pk }}</th>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<form action="{% url 'wage:paymentoutput' %}" method="post">
+{% csrf_token %}
+    <button type="submit" class="btn btn-primary">导出</button>
+</form>
+
+{% endblock %}

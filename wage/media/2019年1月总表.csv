@@ -1,0 +1,6 @@
+aaa,2000.0,"0.1,0.2,0.3,0.4",1,0.05,fff,False,True,True
+bbb,2500.0,"0.1,0.2,0.3,0.4",1,0.05,fff,False,True,True
+ccc,1500.0,"0.1,0.2,0.3,0.4",1,0.05,bbb,False,True,True
+ddd,2000.0,"0.1,0.2,0.3,0.4",1,0.05,bbb,False,True,True
+eee,2000.0,"0.1,0.2,0.3,0.4",1,0.05,ddd,False,True,True
+fff,3000.0,"0.1,0.2,0.3,0.4",1,0.0,,True,True,True

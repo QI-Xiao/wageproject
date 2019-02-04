@@ -1,0 +1,42 @@
+{% extends 'wage/base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+
+<h2>所有员工</h2>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>店员</th>
+                <th>底薪</th>
+                <th>提成</th>
+                <th>任务单量</th>
+                <th>徒弟提点</th>
+                <th>师父</th>
+                <th>店长</th>
+                <th>在职</th>
+                <th>计算完毕</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        {% for employee in employees %}
+            <tr>
+                <th>{{ employee.name }}</th>
+                <th>{{ employee.base_pay }}</th>
+                <th>{{ employee.commission_rate }}</th>
+                <th>{{ employee.task_quantity }}</th>
+                <th>{{ employee.superior_income_rate }}</th>
+                <th>{{ employee.teacher }}</th>
+                <th>{{ employee.shop_manager }}</th>
+                <th>{{ employee.on_job }}</th>
+                <th>{{ employee.calculate_finished }}</th>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
