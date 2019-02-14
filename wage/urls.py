@@ -12,4 +12,5 @@ urlpatterns = [
     path('orderinput/', views.orderinput, name='orderinput'),
     path(r'calculate/<int:onemoney_id>/', views.detail, name='detail'),
     path(r'calculate/paymentoutput/', views.paymentoutput, name='paymentoutput'),
+    path(r'changestatus/', views.changestatus, name='changestatus'),
 ]

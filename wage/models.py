@@ -1,16 +1,6 @@
 from django.db import models
 
 
-# pandas
-# order_id
-# 程序员文明
-# 程序员鼓励师
-# 前端程序员教你写代码
-# Python_梦飞
-# 一起学编程
-# 编程酷站
-
-
 class Employee(models.Model):
     name = models.CharField(max_length=100, verbose_name='店员')
     base_pay = models.FloatField(verbose_name='底薪')

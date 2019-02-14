@@ -18,7 +18,7 @@
 </head>
 
 <body>
-
+{% block search %}
 <div class="calendar">
   <div class="title">
     <h1 class="green" id="calendar-month">{{month}}</h1>
@@ -27,6 +27,9 @@
     <a href="" id="next">Next Month</a>
   </div>
 </div>
+
+{% block body %}
+{% endblock %}
 
 <script>
 var month_name = ["January","Febrary","March","April","May","June","July","Auguest","September","October","November","December"];
@@ -80,8 +83,6 @@ next.onclick = function(e){
     });
 }
 </script>
-
-{% block body %}
 {% endblock %}
 </body>
 </html>

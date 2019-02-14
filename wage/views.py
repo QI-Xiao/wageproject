@@ -13,8 +13,9 @@ from collections import namedtuple
 #     for item in reader:
 #         print(item)
 
-year = timezone.now().year
-month = timezone.now().month
+year = yearnow = timezone.now().year
+month = monthnow = timezone.now().month
+day = daynow = timezone.now().day
 
 
 def orderinput(request):
@@ -71,7 +72,6 @@ def orderinput(request):
         #     #print(row.name)
         #
         # orderfile.close()
-
         return HttpResponse('写入成功')
     return HttpResponse('要post呀')
 
@@ -94,8 +94,36 @@ def paymentoutput(request):
             f_csv = csv.writer(file)
             f_csv.writerows(em_list)
 
-        return HttpResponse('aaa')
+        return HttpResponse('导出成功')
     return HttpResponseRedirect(reverse('wage:calculate'))
+
+
+def changestatus(request):
+    status1 = request.POST.getlist('status1')
+    status2 = request.POST.getlist('status2')
+    status1 = list(set(status1))
+    status2 = list(set(status2))
+    print('status1:', status1)
+    print('status2:', status2)
+    statusintersect = list(set(status1).intersection(set(status2)))
+    if statusintersect:
+        print('statusintersect:', statusintersect)
+        return HttpResponse('重复勾选')
+    for i in status1:
+        print('循环1')
+        order = Order.objects.get(id=i)
+        if order.status == 0:
+            order.status = 1
+            order.change_date = datetime.date(yearnow, monthnow, daynow)
+            order.save()
+    for i in status2:
+        print('循环2')
+        order = Order.objects.get(id=i)
+        if order.status == (0 or 1):
+            order.status = 2
+            order.change_date = datetime.date(yearnow, monthnow, daynow)
+            order.save()
+    return HttpResponseRedirect(reverse('wage:index'))
 
 
 def detail(request, onemoney_id):
@@ -122,8 +150,11 @@ def index(request):
         year = int(year_input)
     ordersnew = Order.objects.filter(order_time__month = month, order_time__year = year)
     orderswed = Order.objects.filter(wedding_time__month=month, wedding_time__year=year)
+    print('直到这一步没有问题')
+    orderchanged = Order.objects.exclude(id__in=ordersnew).exclude(id__in=orderswed).filter(change_date__month=month, change_date__year=year)
+    print('这一步呢')
     print('year,month:',year,month)
-    return render(request, 'wage/index.html', {'ordersnew':ordersnew, 'orderswed':orderswed, 'month':month, 'year':year})
+    return render(request, 'wage/index.html', {'ordersnew':ordersnew, 'orderswed':orderswed, 'orderchanged':orderchanged, 'month':month, 'year':year})
 
 
 def employee(request):
@@ -182,23 +213,24 @@ def calculate(request):
         print('chargeback:', chargeback)
         order= Order.objects.get(order_number = chargeback)
         print(order)
-        if order.status != (3 or 4):
+        if order.status != 4:
             if order.status != 0:
                 print('是需要处理的订单')
                 if order.calculated and (order.is_task_order is False):
                     print('不是任务单，进行退费')
                     onespay, created = Monthlymoney.objects.get_or_create(
-                        month=datetime.date(year, month, 10),
+                        month=datetime.date(yearnow, monthnow, 10),
                         whose_salary=order.whose_order,
                     )
-                    if order.status == 1:
+                    if order.status == (1 or 2):
                         onespay.commission_minus += order.money * order.commission_rate * 0.5
-                    if order.status == 2:
+                    if order.status == 3:
                         onespay.commission_minus += order.money * order.commission_rate
                     onespay.save()
                 print('任务单，不做退费')
             order.status = 4
             order.is_chargeback = True
+            order.change_date = datetime.date(yearnow, monthnow, daynow)
             order.save()
 
     ordersnew = Order.objects.filter(order_time__month=month, order_time__year=year, status__in=[1,2], calculated=False)
@@ -249,7 +281,7 @@ def calculate(request):
     while employees.filter(calculate_finished=False):
         for employee in employees.filter(calculate_finished=False):
             print('employee:', employee)
-            if not employee.students.exists() or employee.students.filter(calculate_finished=True).count()==employee.students.count():
+            if (not employee.students.exists()) or employee.students.filter(calculate_finished=True).count()==employee.students.count():
                 employee.calculate_finished = True
                 employee.save()
                 onespay, created = Monthlymoney.objects.get_or_create(

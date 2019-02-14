@@ -3,7 +3,7 @@
 {% block head %}
 {% endblock %}
 
-{% block body %}
+{% block search %}
 <br />
 <br />
 <br />
@@ -46,7 +46,7 @@
                 <th>{{ order.whose_order }}</th>
                 <th>{{ order.order_number }}</th>
                 <th>{{ order.calculated }}</th>
-                {% if order.status != 3 %}{% if order.status != 4 %}<th><input type="radio" name="chargeback" value="{{ order.order_number }}" /></th>{% endif %}{% endif %}
+                {% if order.status != 4 %}<th><input type="radio" name="chargeback" value="{{ order.order_number }}" /></th>{% endif %}
             </tr>
         {% endfor %}
         </tbody>
