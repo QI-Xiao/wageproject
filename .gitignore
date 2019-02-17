@@ -7,3 +7,6 @@ db.sqlite3
 .jpg
 .jpeg
 .gif
+.xls
+.xlsx
+.sqlite3

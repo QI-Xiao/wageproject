@@ -93,6 +93,7 @@
                 <th>店员</th>
                 <th>订单号</th>
                 <th>已被计入</th>
+                <th>已付定金</th>
                 <th>已付尾款</th>
             </tr>
         </thead>
@@ -112,14 +113,13 @@
                 <th>{{ order.whose_order }}</th>
                 <th>{{ order.order_number }}</th>
                 <th>{{ order.calculated }}</th>
-                <th>{% if order.status == 1 %}<input type="checkbox" name="status2" value="{{ order.id }}" />{% else %}<input type="checkbox" disabled/>{% endif %}</th>
+                <th>{% if order.status == 0 %}<input type="checkbox" name="status1" value="{{ order.id }}" />{% else %}<input type="checkbox" disabled/>{% endif %}</th>
+                <th>{% if order.status == 0 or order.status == 1 %}<input type="checkbox" name="status2" value="{{ order.id }}" />{% else %}<input type="checkbox" disabled/>{% endif %}</th>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 </div>
-    <button type="submit" class="btn btn-primary">更改状态</button>
-</form>
 
 <h4>其余修改订单</h4>
 <div class="table-responsive">
@@ -139,6 +139,8 @@
                 <th>店员</th>
                 <th>订单号</th>
                 <th>已被计入</th>
+                <th>已付定金</th>
+                <th>已付尾款</th>
             </tr>
         </thead>
         <tbody>
@@ -157,11 +159,15 @@
                 <th>{{ order.whose_order }}</th>
                 <th>{{ order.order_number }}</th>
                 <th>{{ order.calculated }}</th>
+                <th>{% if order.status == 0 %}<input type="checkbox" name="status1" value="{{ order.id }}" />{% else %}<input type="checkbox" disabled/>{% endif %}</th>
+                <th>{% if order.status == 0 or order.status == 1 %}<input type="checkbox" name="status2" value="{{ order.id }}" />{% else %}<input type="checkbox" disabled/>{% endif %}</th>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 </div>
+    <button type="submit" class="btn btn-primary">更改状态</button>
+</form>
 
 <form action="{% url 'wage:calculate' %}" method="post">
 {% csrf_token %}

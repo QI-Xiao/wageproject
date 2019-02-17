@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    {% for order in inf_order %}
+        {{ order }}<br />
+    {% endfor %}
+    <form action="{% url 'wage:index' %}" method="get">
+        <button type="submit" class="btn btn-primary">返回</button>
+    </form>
+</body>
+</html>

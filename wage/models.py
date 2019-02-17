@@ -4,9 +4,9 @@ from django.db import models
 class Employee(models.Model):
     name = models.CharField(max_length=100, verbose_name='店员')
     base_pay = models.FloatField(verbose_name='底薪')
-    commission_rate = models.CharField(max_length=100, verbose_name='提点') # 四种类型，逗号分隔
+    commission_rate = models.CharField(max_length=100, verbose_name='提点') # 五种类型，逗号分隔 ex：0.1,0.15,0.2,0.25,0.3
     task_quantity = models.IntegerField(verbose_name='任务单量')
-    superior_income_rate = models.FloatField(verbose_name='徒弟提点') # 徒弟的
+    superior_income_rate = models.TextField(verbose_name='徒弟提点') # 徒弟的，金额:提点, ex: 0:0.05,1000:0.1,2500:0.2
     teacher = models.ForeignKey('self', on_delete=models.DO_NOTHING, null=True, blank=True, related_name='students', verbose_name='师父')
     shop_manager = models.BooleanField(default=False, verbose_name='店长')
     on_job = models.BooleanField(default=True, verbose_name='在职')
@@ -22,10 +22,11 @@ class Employee(models.Model):
 
 class Order(models.Model):
     ORDER_TYPE = (
-        (0, '单租，定制'),
-        (1, '升级为升级金额'),
-        (2, '大牌套系租赁'),
-        (3, '璀璨套系租赁'),
+        (1, '单租'),
+        (2, '定制'),
+        (3, '大牌'),
+        (4, '璀璨'),
+        (5, '升级'),
     )
     ORDER_STATUS = (
         (0, '不处理'),
@@ -35,6 +36,7 @@ class Order(models.Model):
         (4, '已退款'),
     )
     client_name = models.CharField(max_length=100, verbose_name='顾客')
+    tel = models.IntegerField(null=True, blank=True, verbose_name='电话')
     money = models.FloatField(verbose_name='金额')
     commission_rate = models.FloatField(default=0, verbose_name='提成')
     type = models.IntegerField(choices=ORDER_TYPE, verbose_name='订单类型')
@@ -47,7 +49,6 @@ class Order(models.Model):
     whose_order = models.ForeignKey('Employee', on_delete=models.CASCADE, verbose_name='店员')
     order_number = models.CharField(max_length=20, unique=True, verbose_name='订单号')
     calculated = models.BooleanField(default=False, verbose_name='已被计入当月提成')
-    origin_status = models.IntegerField(choices=ORDER_STATUS, verbose_name='订单原始状态')
     change_date = models.DateField(verbose_name='状态改变时间', blank=True, null=True)
 
     def __str__(self):
