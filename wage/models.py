@@ -44,7 +44,6 @@ class Order(models.Model):
     wedding_time = models.DateField(verbose_name='婚礼时间')
     is_task_order = models.BooleanField(default=False, verbose_name='任务单')
     is_discount_order = models.BooleanField(default=False, verbose_name='活动单')
-    is_chargeback = models.BooleanField(default=False, verbose_name='退单')
     status = models.IntegerField(choices=ORDER_STATUS, verbose_name='订单状态')
     whose_order = models.ForeignKey('Employee', on_delete=models.CASCADE, verbose_name='店员')
     order_number = models.CharField(max_length=20, unique=True, verbose_name='订单号')
@@ -52,10 +51,7 @@ class Order(models.Model):
     change_date = models.DateField(verbose_name='状态改变时间', blank=True, null=True)
 
     def __str__(self):
-        return (
-                '顾客：%s，订单日期：%s，结婚日期：%s'
-                % (self.client_name, self.order_time, self.wedding_time)
-        )
+        return '顾客：%s，订单日期：%s，结婚日期：%s' % (self.client_name, self.order_time, self.wedding_time)
 
     class Meta:
         verbose_name = '订单'
@@ -84,3 +80,15 @@ class Monthlymoney(models.Model):
     class Meta:
         verbose_name = '月薪'
         verbose_name_plural = '月薪'
+
+
+class Config(models.Model):
+    key = models.CharField(max_length=20, verbose_name='键')
+    val = models.TextField(verbose_name='值')
+
+    def __str__(self):
+        return '%s：%s' % (self.key, self.val)
+
+    class Meta:
+        verbose_name = '配置'
+        verbose_name_plural = '配置'

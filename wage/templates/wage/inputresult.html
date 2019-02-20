@@ -5,7 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-    {% for order in inf_order %}
+    {% for order in inf_message %}
         {{ order }}<br />
     {% endfor %}
     <form action="{% url 'wage:index' %}" method="get">

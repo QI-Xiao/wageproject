@@ -1,0 +1,120 @@
+{% extends 'wage/base.html' %}
+
+{% block head %}
+<style type="text/css">
+</style>
+
+<script>
+</script>
+
+{% endblock %}
+
+{% block nocalendar %}
+
+<h4>确定是否已付尾款</h4>
+
+<form action="{% url 'wage:changestatus' %}" method="post">
+{% csrf_token %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>顾客</th>
+                <th>金额</th>
+                <th>提成</th>
+                <th>订单类型</th>
+                <th>预定时间</th>
+                <th>婚礼时间</th>
+                <th>任务单</th>
+                <th>活动单</th>
+                <th>退单</th>
+                <th>订单状态</th>
+                <th>店员</th>
+                <th>订单号</th>
+                <th>已被计入</th>
+                <th>已付尾款</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for order in orderswed %}
+            <tr>
+                <th>{{ order.client_name }}{% if order in ordersnew %} (本月新增){% endif %}</th>
+                <th>{{ order.money }}</th>
+                <th>{{ order.commission_rate }}</th>
+                <th>{{ order.get_type_display }}</th>
+                <th>{{ order.order_time }}</th>
+                <th>{{ order.wedding_time }}</th>
+                <th>{{ order.is_task_order }}</th>
+                <th>{{ order.is_discount_order }}</th>
+                <th>{{ order.is_chargeback }}</th>
+                <th>{{ order.get_status_display }}</th>
+                <th>{{ order.whose_order }}</th>
+                <th>{{ order.order_number }}</th>
+                <th>{{ order.calculated }}</th>
+                <th>{% if order.status == 1 %}<input type="checkbox" name="status2" value="{{ order.id }}" />{% else %}<input type="checkbox" disabled/>{% endif %}</th>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+    <input type="checkbox" id="all">
+    <input type="button" value="全选" class="btn" id="selectAll">
+    <input type="button" value="全不选" class="btn" id="unSelect">
+    <input type="button" value="反选" class="btn" id="reverse">
+    <input type="button" value="获得选中的所有值" class="btn" id="getValue">
+
+    <button type="submit" class="btn btn-primary">更改状态</button>
+</form>
+
+<script>
+    $(function(){
+        $("#all").click(function(){
+            if (this.checked){
+                $(":checkbox[name='status2']").prop("checked",true)
+            }else{
+                $(":checkbox[name='status2']").prop("checked",false)
+            }
+        });
+        $("#selectAll").click(function(){
+            $(":checkbox[name='status2']").prop("checked",true)
+        });
+        $("#unSelect").click(function(){
+            $(":checkbox[name='status2'],#all").prop("checked",false);
+        });
+        $("#reverse").click(function(){
+            $(":checkbox[name='status2']").each(function(){
+                $(this).prop("checked",!$(this).prop("checked"));
+            });
+            allCheck();
+        });
+        $(":checkbox[name='status2']").click(function(){
+            allCheck();
+        });
+        $("#getValue").click(function(){
+            var valArr = new Array;
+            $(":checkbox[name='status2']").each(function(i){
+                if($(this).prop("checked")){
+                    valArr[i]=$(this).val();
+                }
+            });
+            var vals = valArr.join(',');
+            alert(vals);
+        })
+        function allCheck(){
+            var count = $(":checkbox[name='status2']").size();
+            var cut = 0;
+            $(":checkbox[name='status2']").each(function(){
+                if ($(this).prop("checked") == true) {
+                    cut++;
+                }
+            });
+            // alert(cut,count);
+            if (cut == count) {
+                $("#all").prop("checked",true);
+            }else{
+                $("#all").prop("checked",false);
+            }
+        }
+    })
+</script>
+{% endblock %}

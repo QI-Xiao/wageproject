@@ -63,9 +63,11 @@ function newDoc(elem){
     </table>
 </div>
 
+{% if monthlymoney %}
 <form action="{% url 'wage:paymentoutput' %}" method="post">
 {% csrf_token %}
     <button type="submit" class="btn btn-primary">导出</button>
 </form>
+{% endif %}
 
 {% endblock %}

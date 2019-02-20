@@ -1,9 +1,18 @@
 {% extends 'wage/base.html' %}
 
 {% block head %}
+<style>
+tbody tr:hover
+{
+background-color:MistyRose;
+}
+</style>
+
+<script>
+</script>
 {% endblock %}
 
-{% block search %}
+{% block nocalendar %}
 <br />
 <br />
 <br />
@@ -32,7 +41,7 @@
         </thead>
         <tbody>
         {% for order in order_matched %}
-            <tr>
+            <tr onclick="newDoc(this)">
                 <th>{{ order.client_name }}</th>
                 <th>{{ order.money }}</th>
                 <th>{{ order.commission_rate }}</th>
@@ -46,11 +55,16 @@
                 <th>{{ order.whose_order }}</th>
                 <th>{{ order.order_number }}</th>
                 <th>{{ order.calculated }}</th>
-                {% if order.status != 4 %}<th><input type="radio" name="chargeback" value="{{ order.order_number }}" /></th>{% endif %}
+                {% if order.status != 4 %}<th><input type="checkbox" name="chargeback" value="{{ order.order_number }}" /></th>{% endif %}
             </tr>
         {% endfor %}
         </tbody>
     </table>
+        <input type="checkbox" id="all">
+        <input type="button" value="全选" class="btn" id="selectAll">
+        <input type="button" value="全不选" class="btn" id="unSelect">
+        <input type="button" value="反选" class="btn" id="reverse">
+        <input type="button" value="获得选中的所有值" class="btn" id="getValue">
     {% if order_matched %}<input type="submit" value="退单" />{% endif %}
     </form>
 </div>
@@ -59,4 +73,55 @@
     <h4>{{ inf_message }}</h4>
 {% endif %}
 
+<script>
+    $(function(){
+        $("#all").click(function(){
+            if (this.checked){
+                $(":checkbox[name='chargeback']").prop("checked",true)
+            }else{
+                $(":checkbox[name='chargeback']").prop("checked",false)
+            }
+        });
+        $("#selectAll").click(function(){
+            $(":checkbox[name='chargeback']").prop("checked",true)
+        });
+        $("#unSelect").click(function(){
+            $(":checkbox[name='chargeback'],#all").prop("checked",false);
+        });
+        $("#reverse").click(function(){
+            $(":checkbox[name='chargeback']").each(function(){
+                $(this).prop("checked",!$(this).prop("checked"));
+            });
+            allCheck();
+        });
+        $(":checkbox[name='chargeback']").click(function(){
+            allCheck();
+        });
+        $("#getValue").click(function(){
+            var valArr = new Array;
+            $(":checkbox[name='chargeback']").each(function(i){
+                if($(this).prop("checked")){
+                    valArr[i]=$(this).val();
+                }
+            });
+            var vals = valArr.join(',');
+            alert(vals);
+        })
+        function allCheck(){
+            var count = $(":checkbox[name='chargeback']").size();
+            var cut = 0;
+            $(":checkbox[name='chargeback']").each(function(){
+                if ($(this).prop("checked") == true) {
+                    cut++;
+                }
+            });
+            // alert(cut,count);
+            if (cut == count) {
+                $("#all").prop("checked",true);
+            }else{
+                $("#all").prop("checked",false);
+            }
+        }
+    })
+</script>
 {% endblock %}
