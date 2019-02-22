@@ -27,7 +27,15 @@
     <a href="" id="next">Next Month</a>
   </div>
 </div>
-
+<h2>结算月份</h2>
+<div class="calendar">
+  <div class="title">
+    <h1 class="green" id="account-month">{{monthaccount}}</h1>
+    <h2 class="green" id="account-year">{{yearaccount}}</h2>
+    <a href="" id="prev-account">Prev Month</a>
+    <a href="" id="next-account">Next Month</a>
+  </div>
+</div>
 {% block body %}
 {% endblock %}
 
@@ -37,13 +45,21 @@ var prev = document.getElementById("prev");
 var next = document.getElementById("next");
 var cmonth = document.getElementById("calendar-month");
 var cyear = document.getElementById("calendar-year");
-
 var my_year = document.getElementById("calendar-year").innerHTML;
 var my_month = document.getElementById("calendar-month").innerHTML - 1;
+
+var prev_acc = document.getElementById("prev-account");
+var next_acc = document.getElementById("next-account");
+var accmonth = document.getElementById("account-month");
+var accyear = document.getElementById("account-year");
+var account_year = document.getElementById("account-year").innerHTML;
+var account_month = document.getElementById("account-month").innerHTML - 1;
 
 function refreshDate(){
 	cmonth.innerHTML = month_name[my_month]; //设置英文月份显示
 	cyear.innerHTML = my_year; //设置年份显示
+	accmonth.innerHTML = month_name[account_month]; //设置英文月份显示
+	accyear.innerHTML = account_year; //设置年份显示
 }
 refreshDate();
 prev.onclick = function(e){
@@ -75,6 +91,43 @@ next.onclick = function(e){
 	    $.get("", {
         "my_month": my_month,
         "my_year": my_year,
+        }, function(data, status){
+        if (status == "success"){
+        console.log('后一月');
+        window.location.reload();
+        }
+    });
+}
+
+prev_acc.onclick = function(e){
+	e.preventDefault();
+	account_month--;
+	if(account_month<0){
+		account_year--;
+		account_month = 11;
+	}
+	refreshDate();
+    $.get("", {
+        "account_month": account_month,
+        "account_year": account_year,
+        }, function(data, status){
+        if (status == "success"){
+        console.log('前一月');
+        window.location.reload();
+        }
+    });
+}
+next_acc.onclick = function(e){
+	e.preventDefault();
+	account_month++;
+	if(account_month>11){
+		account_year++;
+		account_month = 0;
+	}
+	refreshDate();
+	    $.get("", {
+        "account_month": account_month,
+        "account_year": account_year,
         }, function(data, status){
         if (status == "success"){
         console.log('后一月');

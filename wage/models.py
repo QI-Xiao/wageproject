@@ -48,7 +48,8 @@ class Order(models.Model):
     whose_order = models.ForeignKey('Employee', on_delete=models.CASCADE, verbose_name='店员')
     order_number = models.CharField(max_length=20, unique=True, verbose_name='订单号')
     calculated = models.BooleanField(default=False, verbose_name='已被计入当月提成')
-    change_date = models.DateField(verbose_name='状态改变时间', blank=True, null=True)
+    chargeback_date = models.DateField(verbose_name='退单时间', blank=True, null=True)
+    orderfinish_date = models.DateField(verbose_name='订单完成时间', blank=True, null=True)
 
     def __str__(self):
         return '顾客：%s，订单日期：%s，结婚日期：%s' % (self.client_name, self.order_time, self.wedding_time)

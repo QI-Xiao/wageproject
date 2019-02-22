@@ -19,7 +19,7 @@ background-color:MistyRose;
 <h4>搜索结果</h4>
 
 <div class="table-responsive">
-    <form action="{% url 'wage:calculate' %}" method="post">
+    <form action="{% url 'wage:changechargeback' %}" method="post">
     {% csrf_token %}
     <table class="table table-striped">
         <thead>

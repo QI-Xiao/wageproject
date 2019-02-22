@@ -62,7 +62,7 @@
                 <th>{{ order.is_task_order }}</th>
                 <th>{{ order.is_discount_order }}</th>
                 <th>{{ order.is_chargeback }}</th>
-                <th>{{ order.get_status_display }}</th>
+                <th>{{ order.get_status_display }}{% if order.chargeback_date and order.status != 4 %} (待退款){% endif %}</th>
                 <th>{{ order.whose_order }}</th>
                 <th>{{ order.order_number }}</th>
                 <th>{{ order.calculated }}</th>
@@ -73,7 +73,6 @@
 </div>
 
 <h4>本月结婚订单</h4>
-
 <div class="table-responsive">
     <table class="table table-striped">
         <thead>
@@ -105,7 +104,7 @@
                 <th>{{ order.is_task_order }}</th>
                 <th>{{ order.is_discount_order }}</th>
                 <th>{{ order.is_chargeback }}</th>
-                <th>{{ order.get_status_display }}</th>
+                <th>{{ order.get_status_display }}{% if order.chargeback_date and order.status != 4 %} (待退款){% endif %}</th>
                 <th>{{ order.whose_order }}</th>
                 <th>{{ order.order_number }}</th>
                 <th>{{ order.calculated }}</th>
@@ -147,7 +146,7 @@
                 <th>{{ order.is_task_order }}</th>
                 <th>{{ order.is_discount_order }}</th>
                 <th>{{ order.is_chargeback }}</th>
-                <th>{{ order.get_status_display }}</th>
+                <th>{{ order.get_status_display }}{% if order.chargeback_date and order.status != 4 %} (待退款){% endif %}</th>
                 <th>{{ order.whose_order }}</th>
                 <th>{{ order.order_number }}</th>
                 <th>{{ order.calculated }}</th>
@@ -157,25 +156,23 @@
     </table>
 </div>
 
-<form action="{% url 'wage:bef_cal' %}" method="post">
+<a href="{% url 'wage:findstatus' %}" class="btn btn-primary" role="button">选择已付尾款</a>
+<a href="{% url 'wage:findtask' %}" class="btn btn-primary" role="button">选择任务单</a>
+<a href="{% url 'wage:findchargeback' %}" class="btn btn-default active" role="button">选择退单</a>
+
+<br />
+<br />
+<form action="{% url 'wage:calculate' %}" method="post">
 {% csrf_token %}
     <button type="submit" name="calculate" class="btn btn-primary">计算金额</button>
 </form>
-<br />
-<form action="{% url 'wage:randomorder' %}" method="post">
-{% csrf_token %}
-    <button type="submit" class="btn btn-primary">随机生成订单</button>
-</form>
-<br />
-<form action="{% url 'wage:employee' %}" method="post">
-{% csrf_token %}
-    <button type="submit" name="employee" class="btn btn-primary">管理员工</button>
-</form>
 
-<form action="{% url 'wage:restart' %}" method="post">
+<form action="{% url 'wage:checkresult' %}" method="post">
 {% csrf_token %}
-    <button type="submit" class="btn btn-primary">重置</button>
+    <button type="submit" name="calculate" class="btn btn-primary">查看结果</button>
 </form>
+<br />
+
 <br />
 
 <form enctype="multipart/form-data" action="{% url 'wage:inputorder' %}" method="post">

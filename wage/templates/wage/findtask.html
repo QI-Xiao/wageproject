@@ -12,7 +12,7 @@
 {% block nocalendar %}
 
 <h4>确定任务单</h4>
-<form action="{% url 'wage:bef_cal3' %}" method="post">
+<form action="{% url 'wage:changetask' %}" method="post">
 {% csrf_token %}
 <div class="table-responsive">
     <table class="table table-striped">
