@@ -210,11 +210,37 @@ def inputemployee(request):
     return HttpResponseRedirect(reverse('wage:index'))
 
 
+def len_byte(value):
+    length = len(value)
+    utf8_length = len(value.encode('utf-8'))
+    length = (utf8_length - length) / 2 + length
+    return int(length)
+
+
 def writeexcel(lists, path):
     workbook = xlwt.Workbook(encoding='ascii')
     sheet = workbook.add_sheet('sheet 1')
+    alignment = xlwt.Alignment()
+    alignment.horz = xlwt.Alignment.HORZ_CENTER
     datastyle = xlwt.XFStyle()
     datastyle.num_format_str = 'yyyy-mm-dd'
+    datastyle.alignment = alignment
+    strstyle = xlwt.XFStyle()
+    strstyle.alignment = alignment
+
+    # 确定栏位宽度
+    col_width = []
+    for i in range(len(lists)):
+        for j in range(len(lists[i])):
+            if i == 0:
+                col_width.append(len_byte(str(lists[i][j])))
+            else:
+                if col_width[j] < len_byte(str(lists[i][j])):
+                    col_width[j] = len_byte(str(lists[i][j]))
+    # 设置栏位宽度，栏位宽度小于10时候采用默认宽度
+    for i in range(len(col_width)):
+        if col_width[i] >= 10:
+            sheet.col(i).width = 256 * (col_width[i] + 1)
 
     for row in range(len(lists)):
         onelist = lists[row]
@@ -223,7 +249,7 @@ def writeexcel(lists, path):
             if isinstance(item, datetime.date):
                 sheet.write(row, col, item, datastyle)
             else:
-                sheet.write(row, col, label=item)
+                sheet.write(row, col, item, strstyle)
             # print('行:', row, ' 列:', col, ' 值:', item)
     workbook.save(path)
 
@@ -239,7 +265,7 @@ def paymentoutput(request):
             em_lists.append([employee.name, employee.base_pay, employee.commission_rate, employee.task_quantity, employee.superior_income_rate, str(employee.teacher), employee.shop_manager, employee.on_job, employee.calculate_finished])
             # print(employee)
             money = employee.monthlymoney_set.get(month=datetime.date(yearaccount, monthaccount, 10))
-            money_lists.append([str(money.whose_salary), money.base_salary, money.task_finished, money.whose_salary.task_quantity, money.commission_current, money.commission_before, money.commission_passive, money.commission_shop_manager, money.commission_minus, money.other_salary, money.total_salary])
+            money_lists.append([str(money.whose_salary), format(money.base_salary,'.2f'), money.task_finished, money.whose_salary.task_quantity, format(money.commission_current,'.2f'), format(money.commission_before,'.2f'), format(money.commission_passive,'.2f'), format(money.commission_shop_manager,'.2f'), format(money.commission_minus,'.2f'), format(money.other_salary,'.2f'), format(money.total_salary,'.2f')])
             # print('money_lists:',money_lists)
             orders = Order.objects.filter(Q(order_time__month=monthaccount, order_time__year=yearaccount, whose_order=employee) | Q(wedding_time__month=monthaccount, wedding_time__year=yearaccount, whose_order=employee)).order_by('-is_task_order', 'order_time', 'money')
             order_lists = [['顾客', '金额', '提点', '类型', '预定日期', '婚期', '任务', '折扣', '状态', '负责人', '编号', '计算完毕', '服务结束日期', '退单日期']]
@@ -317,9 +343,9 @@ git 提交了xls，怎么回事
 
 def index(request):
     getdate(request)
-    ordersnew = Order.objects.filter(order_time__month=month, order_time__year=year).order_by("order_time", "wedding_time")
-    orderswed = Order.objects.filter(wedding_time__month=month, wedding_time__year=year).order_by("wedding_time")
-    orderchanged = Order.objects.exclude(id__in=ordersnew).exclude(id__in=orderswed).filter(chargeback_date__month=month, chargeback_date__year=year)
+    ordersnew = Order.objects.filter(order_time__month=month, order_time__year=year).order_by("is_task_order","order_time", "wedding_time")
+    orderswed = Order.objects.filter(wedding_time__month=month, wedding_time__year=year).order_by("order_time", "wedding_time")
+    orderchanged = Order.objects.exclude(id__in=ordersnew).exclude(id__in=orderswed).filter(chargeback_date__month=month, chargeback_date__year=year).order_by("order_time", "wedding_time")
     print('year,month:', year, month)
     # Order.objects.all().update(chargeback_date=None, status=1,calculated=False,orderfinish_date=None, is_task_order=False)
     # Monthlymoney.objects.all().delete()

@@ -12,86 +12,54 @@
 <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
 <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-{% block head %}
-{% endblock %}
+
+<style type="text/css">
+</style>
 
 </head>
 
 <body>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<ul id="list">
-   <li><label><input type="checkbox" name="step" value="1"> 1.我是记录来的呢</label></li>
-   <li><label><input type="checkbox" name="step" value="2"> 2.哈哈，真的太天真了</label></li>
-   <li><label><input type="checkbox" name="step" value="3"> 3.爱上你是我的错吗？</label></li>
-   <li><label><input type="checkbox" name="step" value="4"> 4.从开始你就不应用爱上我</label></li>
-   <li><label><input type="checkbox" name="step" value="5"> 5.喜欢一个人好难</label></li>
-   <li><label><input type="checkbox" name="step" value="6"> 6.你在那里呢</label></li>
-</ul>
-<input type="checkbox" id="all">
-<input type="button" value="全选" class="btn" id="selectAll">
-<input type="button" value="全不选" class="btn" id="unSelect">
-<input type="button" value="反选" class="btn" id="reverse">
-<input type="button" value="获得选中的所有值" class="btn" id="getValue">
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Color</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Apple</td>
+      <td>Red</td>
+      <td>These are red.</td>
+    </tr>
+    <tr>
+      <td>Pear</td>
+      <td>Green</td>
+      <td>These are green.</td>
+    </tr>
+    <tr>
+      <td>Grape</td>
+      <td>Purple / Green</td>
+      <td>These are purple and green.</td>
+    </tr>
+    <tr>
+      <td>Orange</td>
+      <td>Orange</td>
+      <td>These are orange.</td>
+    </tr>
+    <tr>
+      <td>Banana</td>
+      <td>Yellow</td>
+      <td>These are yellow.</td>
+    </tr>
+    <tr>
+      <td>Kiwi</td>
+      <td>Green</td>
+      <td>These are green.</td>
+    </tr>
+  </tbody>
+</table>
 
-<script type="text/javascript">
-$(function(){
-    //全选
-    $("#all").click(function(){
-        if (this.checked) {
-            $("#list :checkbox").prop("checked",true);
-        }else{
-            $("#list :checkbox").prop("checked",false);
-        }
-    });
-
-    $("#selectAll").click(function(){
-        $("#list :checkbox,#all").prop("checked",true);
-    });
-
-    $("#unSelect").click(function(){
-        $("#list :checkbox,#all").prop("checked",false);
-    });
-
-    $("#reverse").click(function(){
-        $("#list :checkbox").each(function(){
-            $(this).prop("checked",!$(this).prop("checked"));
-        });
-        allCheck();
-    });
-
-    //设置全选复选框
-    $("#list :checkbox").click(function(){
-        allCheck();
-    });
-
-    $("#getValue").click(function(){
-        var valArr = new Array;
-        $("#list input[name='step']").each(function(i){
-            if($(this).prop("checked")){
-                valArr[i]=$(this).val();
-            }
-        });
-        var vals = valArr.join(',');
-        alert(vals);
-    })
-
-    function allCheck(){
-        var count = $("#list :checkbox").size();
-        var cut = 0;
-        $("#list :checkbox").each(function(){
-            if ($(this).prop("checked") == true) {
-                cut++;
-            }
-        });
-        // alert(cut,count);
-        if (cut == count) {
-            $("#all").prop("checked",true);
-        }else{
-            $("#all").prop("checked",false);
-        }
-    }
-})
-
-</script>
 </body>
 </html>

@@ -21,19 +21,21 @@
 {% block nocalendar %}
 <div class="calendar">
   <div class="title">
-    <h1 class="green" id="calendar-month">{{month}}</h1>
-    <h2 class="green" id="calendar-year">{{year}}</h2>
-    <a href="" id="prev">Prev Month</a>
-    <a href="" id="next">Next Month</a>
+    显示月份
+    <a href="" id="prev"><span class="glyphicon glyphicon-triangle-left" aria-hidden="true"></span></a>
+    <span class="green" id="calendar-month">{{month}}</span>
+    <span class="green" id="calendar-year">{{year}}</span>
+    <a href="" id="next"><span class="glyphicon glyphicon-triangle-right" aria-hidden="true"></span></a>
   </div>
 </div>
-<h2>结算月份</h2>
+
 <div class="calendar">
   <div class="title">
-    <h1 class="green" id="account-month">{{monthaccount}}</h1>
-    <h2 class="green" id="account-year">{{yearaccount}}</h2>
-    <a href="" id="prev-account">Prev Month</a>
-    <a href="" id="next-account">Next Month</a>
+    结算月份
+    <a href="" id="prev-account"><span class="glyphicon glyphicon-triangle-left" aria-hidden="true"></span></a>
+    <span class="green" id="account-month">{{monthaccount}}</span>
+    <span class="green" id="account-year">{{yearaccount}}</span>
+    <a href="" id="next-account"><span class="glyphicon glyphicon-triangle-right" aria-hidden="true"></span></a>
   </div>
 </div>
 {% block body %}
