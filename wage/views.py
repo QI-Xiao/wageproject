@@ -3,10 +3,12 @@ from django.utils import timezone
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.db.models import Q, Sum
+from django.contrib.auth.decorators import login_required
 
 from .models import Employee, Order, Monthlymoney, Config
+from PIL import Image, ImageDraw, ImageFont
 
-import xlrd, xlwt, datetime, re, random, os
+import xlrd, xlwt, datetime, re, os
 
 
 thismonth = datetime.date.today()
@@ -45,7 +47,7 @@ def mkdir(path):
     else:
         print('there is a folder')
 
-
+@login_required
 def inputorder(request):
     if request.method == "POST":
         inf_message = []
@@ -133,7 +135,7 @@ def inputorder(request):
         return render(request, 'wage/inputresult.html', {'inf_message': inf_message})
     return HttpResponseRedirect(reverse('wage:index'))
 
-
+@login_required
 # 有 bug，必须保证没有徒弟的先输入进去，不然会出错
 def inputemployee(request):
     if request.method == "POST":
@@ -253,8 +255,8 @@ def writeexcel(lists, path):
             # print('行:', row, ' 列:', col, ' 值:', item)
     workbook.save(path)
 
-
-def paymentoutput(request):
+@login_required
+def paymentoutputexcel(request):
     if request.method == "POST":
         em_lists = [['姓名', '底薪', '提点', '任务单量', '给师傅提点', '师傅', '店长', '在职', '计算完毕']]
         money_lists = [['店员', '底薪', '完成任务单', '总任务单', '当月订单提成', '以往留存提成', '带徒弟提成', '店长提成', '退单', '额外调整', '总金额']]
@@ -282,6 +284,124 @@ def paymentoutput(request):
     return HttpResponseRedirect(reverse('wage:calculate'))
 
 
+def part_jpg(items, title, width_now, height_now, draw, color, font, addline=False):
+    if items:
+        height_now += 46
+        draw.text((width_now, height_now), title, color, font)
+        height_now += font.size + 46
+        for item in items:
+            draw.text((width_now, height_now), '          '.join(item), color, font)
+            height_now += 54
+        height_now += font.size
+        if addline:
+            draw.line(((width_now, height_now), (1060, height_now)), (0, 0, 0), width=5)
+    return width_now, height_now
+
+
+def createjpg(itemlists, path):
+
+    print(itemlists)
+
+    width = 1125
+    height = 330 + 144*6 + len(itemlists['task_order'])*54 + len(itemlists['new_order'])*54 + len(itemlists['wedding_order'])*54 + len(itemlists['student'])*54 + len(itemlists['shop_manager'])*54 + len(itemlists['chargeback_order'])*54 + 236 + 80 + 46
+    # newIm = Image.open('sample.jpg')
+    newIm = Image.new('RGB', (width, height), 'white')
+
+    # font_type = '/System/Library/Fonts/AdobeSongStd-Light.otf'
+    font_type = 'AdobeHeitiStd-Regular.otf'
+    header_font = ImageFont.truetype(font_type, 110)
+    title_font = ImageFont.truetype(font_type, 63)
+    font = ImageFont.truetype(font_type, 26)
+    end_font = ImageFont.truetype(font_type, 80)
+    color = "#000000"
+
+    draw = ImageDraw.Draw(newIm)
+
+    draw.text((58, 74), u'%s' % itemlists['name'], color, header_font)
+    draw.text((58, 226), u'%s' % itemlists['date'], color, title_font)
+    draw.line(((58, 329), (1060, 329)), (0, 0, 0), width=5)
+    # draw.line(((58, 340), (1060, 340)), (0, 0, 0), width=5)
+    width_now = 58
+    height_now = 330
+
+    width_now, height_now = part_jpg(itemlists['task_order'], '任务单', width_now, height_now, draw, color, font)
+    width_now, height_now = part_jpg(itemlists['new_order'], '当月订单提点', width_now, height_now, draw, color, font)
+    width_now, height_now = part_jpg(itemlists['wedding_order'], '当月完成服务提点', width_now, height_now, draw, color, font)
+
+    if itemlists['task_order'] or itemlists['new_order'] or itemlists['wedding_order']:
+        draw.line(((58, height_now), (1060, height_now)), (0, 0, 0), width=5)
+
+    width_now, height_now = part_jpg(itemlists['student'], '传帮带提点', width_now, height_now, draw, color, font, True)
+    width_now, height_now = part_jpg(itemlists['shop_manager'], '全店提点', width_now, height_now, draw, color, font, True)
+    width_now, height_now = part_jpg(itemlists['chargeback_order'], '退单扣减', width_now, height_now, draw, color, font, True)
+
+    height_now += 46
+    draw.text((width_now, height_now), '基础底薪', color, font)
+    draw.text((800, height_now), itemlists['base_pay'], color, font)
+    height_now += 46 + font.size
+    draw.text((width_now, height_now), '额外调整', color, font)
+    draw.text((800, height_now), itemlists['other_salary'], color, font)
+    height_now += 46 + font.size
+    draw.line(((58, height_now), (1060, height_now)), (0, 0, 0), width=5)
+    height_now += 46
+    draw.text((750, height_now), itemlists['total_salary'], color, end_font)
+    newIm.save(path)
+
+@login_required
+def paymentoutput(request):
+    if request.method == "POST":
+        em_lists = [['姓名', '底薪', '提点', '任务单量', '给师傅提点', '师傅', '店长', '在职', '计算完毕']]
+        money_lists = [['店员', '底薪', '完成任务单', '总任务单', '当月订单提成', '以往留存提成', '带徒弟提成', '店长提成', '退单', '额外调整', '总金额']]
+        path = settings.MEDIA_ROOT + str(yearaccount)+'年'+str(monthaccount)+'月'
+        outputpath = settings.MEDIA_URL + str(yearaccount)+'年'+str(monthaccount)+'月'
+        mkdir(path)
+
+        output_url = []
+        for employee in Employee.objects.filter(on_job=True):
+            em_lists.append([employee.name, employee.base_pay, employee.commission_rate, employee.task_quantity, employee.superior_income_rate, str(employee.teacher), employee.shop_manager, employee.on_job, employee.calculate_finished])
+            # print(employee)
+            money = employee.monthlymoney_set.get(month=datetime.date(yearaccount, monthaccount, 10))
+            money_lists.append([str(money.whose_salary), format(money.base_salary,'.2f'), money.task_finished, money.whose_salary.task_quantity, format(money.commission_current,'.2f'), format(money.commission_before,'.2f'), format(money.commission_passive,'.2f'), format(money.commission_shop_manager,'.2f'), format(money.commission_minus,'.2f'), format(money.other_salary,'.2f'), format(money.total_salary,'.2f')])
+            # print('money_lists:',money_lists)
+            orders = Order.objects.filter(Q(order_time__month=monthaccount, order_time__year=yearaccount, whose_order=employee) | Q(wedding_time__month=monthaccount, wedding_time__year=yearaccount, whose_order=employee)).order_by('-is_task_order', 'order_time', 'money')
+            itemlists = {'name':employee.name,
+                         'date':str(yearaccount) + '年' + str(monthaccount) + '月工资明细',
+                         'task_order':[i.split(',') for i in money.details_task.split(';') if i],
+                         'new_order':[i.split(',') for i in money.details_new.split(';') if i],
+                         'wedding_order':[i.split(',') for i in money.details_wed.split(';') if i],
+                         'student':[i.split(',') for i in money.details_teacher.split(';') if i],
+                         'shop_manager':[i.split(',') for i in money.details_manager.split(';') if i],
+                         'chargeback_order':[i.split(',') for i in money.details_back.split(';') if i],
+                         'base_pay':format(money.base_salary,'.2f'),
+                         'other_salary':format(money.other_salary,'.2f'),
+                         'total_salary':format(money.total_salary,'.2f')
+                         }
+            ordersnewtotal = Order.objects.filter(order_time__month=monthaccount, order_time__year=yearaccount, whose_order=employee, calculated=True)
+            orderstask = ordersnewtotal.filter(is_task_order=True)
+            ordersnew = ordersnewtotal.exclude(id__in=orderstask)
+            orderswed = Order.objects.filter(orderfinish_date__month=monthaccount, orderfinish_date__year=yearaccount, status=3)
+            orderschargeback = Order.objects.filter(chargeback_date__month=monthaccount, chargeback_date__year=yearaccount, status=4)
+            students = employee.students
+
+            print(itemlists)
+
+            order_lists = [['顾客', '金额', '提点', '类型', '预定日期', '婚期', '任务', '折扣', '状态', '负责人', '编号', '计算完毕', '服务结束日期', '退单日期']]
+            for order in orders:
+                order_lists.append([order.client_name, order.money, order.commission_rate, order.get_type_display(), order.order_time, order.wedding_time, order.is_task_order, order.is_discount_order, order.get_status_display(), str(order.whose_order), order.order_number, order.calculated, order.orderfinish_date, order.chargeback_date])
+            # print('order_lists:', order_lists)
+            output_url.append([employee.name, outputpath + '/' + str(yearaccount) + '年' + str(monthaccount) + '月工资明细' + employee.name + '.jpg'])
+            createjpg(itemlists, path + '/' + str(yearaccount) + '年' + str(monthaccount) + '月工资明细' + employee.name + '.jpg')
+
+            order_lists = []
+            # print('结束', employee)
+
+        # writeexcel(em_lists, path + '/' + str(yearaccount)+'年'+str(monthaccount)+'月员工总表' + '.xls')
+        # writeexcel(money_lists, path + '/' + str(yearaccount)+'年'+str(monthaccount)+'月工资总表' + '.xls')
+        return render(request, 'wage/outputresult.html', {'output_url': output_url})
+        # return HttpResponseRedirect(reverse('wage:calculate'))
+    return HttpResponseRedirect(reverse('wage:index'))
+
+@login_required
 def detail(request, onemoney_id):
     getdate(request)
     onemoney = get_object_or_404(Monthlymoney, pk=onemoney_id)
@@ -289,28 +409,7 @@ def detail(request, onemoney_id):
     orderswed = Order.objects.filter(wedding_time__month=monthaccount, wedding_time__year=yearaccount, whose_order=onemoney.whose_salary)
     return render(request, 'wage/detail.html', {'onemoney': onemoney, 'ordersnew':ordersnew, 'orderswed':orderswed, 'month':month, 'year':year, 'monthaccount':monthaccount, 'yearaccount':yearaccount})
 
-
-# def employee(request):
-#     employees = Employee.objects.filter(on_job=True).order_by('shop_manager')
-#     return render(request, 'wage/employee.html', {'employees':employees})
-#
-#
-# def restart(request):
-# #     orderswed = Order.objects.filter(wedding_time__month=month, wedding_time__year=year)
-# #     orderswed.update(status=2, is_chargeback=False, calculated=True)
-# #
-# #     ordersnew = Order.objects.filter(order_time__month=month, order_time__year=year)
-# #     ordersnew.update(status=1, is_chargeback=False, calculated=False, is_task_order=False)
-# #
-# #     employees = Employee.objects.filter(on_job=True)
-# #     employees.update(calculate_finished=False, commission_rate='0.1,0.2,0.3,0.4')
-# #
-# #     onespay = Monthlymoney.objects.filter(month=datetime.date(year, month, 10))
-# #     onespay.update(task_finished=0,commission_current=0,commission_before=0,commission_shop_manager=0,commission_minus=0,other_salary=0)
-# #     print('已经重置')
-#     return HttpResponseRedirect(reverse('wage:index'))
-
-
+@login_required
 def search(request):
     getcontent = request.POST.get('search')
     print('getcontent:', getcontent)
@@ -337,10 +436,9 @@ def search(request):
 使计算的那个页面没法直接get到
 中间过程不能直接get，并且进行一些优化
 计算页面翻日期是直接查看结果，不计算
-git 提交了xls，怎么回事
 '''
 
-
+@login_required
 def index(request):
     getdate(request)
     ordersnew = Order.objects.filter(order_time__month=month, order_time__year=year).order_by("is_task_order","order_time", "wedding_time")
@@ -372,13 +470,23 @@ def calordernew(order, yeardef, monthdef, consider_task=True):
             onespay.task_finished += 1
             order.commission_rate = 0
             order.is_task_order = True
+            orderlist = [order.order_number, order.client_name, str(order.order_time), str(order.wedding_time),
+                         order.get_type_display(), format(order.money, '0.2f')]
+            onespay.details_task += ','.join(orderlist) + ';'
+
         else:
             print('这不是任务单')
             commission_rate = order.whose_order.commission_rate.split(',')
             print('commission_rate:', commission_rate)
             order.commission_rate = float(commission_rate[order.type - 1])
+            orderlist = [order.order_number, order.client_name, str(order.order_time), str(order.wedding_time), order.get_type_display(), format(order.money, '0.2f'), format(order.money * order.commission_rate * 0.6, '0.2f')]
+            onespay.details_new += ','.join(orderlist) + ';'
         onespay.commission_current += order.money * order.commission_rate * 0.6
-        onespay.save()
+    else:
+        orderlist = [order.order_number, order.client_name, str(order.order_time), str(order.wedding_time),
+                     order.get_type_display(), format(order.money, '0.2f')]
+        onespay.details_task += ','.join(orderlist) + ';'
+    onespay.save()
     order.calculated = True
     order.save()
     print('order.calculated:', order.calculated)
@@ -391,7 +499,11 @@ def calorderwed(orderswed, yeardef, monthdef):
             whose_salary=order.whose_order,
         )
         print('order.money:', order.money, '; order.commission_rate:', order.commission_rate)
-        onespay.commission_before += order.money * order.commission_rate * 0.4
+        moneybefore = order.money * order.commission_rate * 0.4
+        onespay.commission_before += moneybefore
+        orderlist = [order.order_number, order.client_name, str(order.order_time), str(order.wedding_time),
+                     order.get_type_display(), format(order.money, '0.2f'), format(moneybefore, '0.2f')]
+        onespay.details_wed += ','.join(orderlist) + ';'
         onespay.save()
         order.status = 3
         order.save()
@@ -414,6 +526,7 @@ def calonespay(yeardef, monthdef):
                 onespay.base_salary = employee.base_pay
                 print('onespay.base_salary:',onespay.base_salary)
                 onespay.commission_passive = 0
+                onespay.details_teacher = ''
                 for student in employee.students.filter(on_job=True):
                     studentpay = Monthlymoney.objects.filter(month=datetime.date(yeardef, monthdef, 10)).get(whose_salary=student)
                     studentpay_money = studentpay.commission_current + studentpay.commission_before + studentpay.commission_passive - studentpay.commission_minus
@@ -427,7 +540,9 @@ def calonespay(yeardef, monthdef):
                             break
                         else:
                             break
-                    onespay.commission_passive += studentpay_money * super_rate
+                    teacherget_money = studentpay_money * super_rate
+                    onespay.commission_passive += teacherget_money
+                    onespay.details_teacher += ','.join([student.name, format(studentpay_money, '0.2f'), format(teacherget_money, '0.2f')]) + ';'
                     # print('super_rate:', super_rate, 'studentpay_money:', studentpay_money)
                     # print('studentpay.commission_current', studentpay.commission_current)
                     # print('studentpay.commission_before',studentpay.commission_before)
@@ -461,6 +576,7 @@ def calonespay(yeardef, monthdef):
                     else:
                         break
                 onespay.commission_shop_manager = manager_rate * monthly_turnover
+            onespay.details_manager = ','.join([format(monthly_turnover, '0.2f'), format(onespay.commission_shop_manager, '0.2f')]) + ';'
         onespay.total_salary = onespay.base_salary + onespay.commission_current + onespay.commission_before + onespay.commission_passive + onespay.commission_shop_manager - onespay.commission_minus + onespay.other_salary
         onespay.save()
         print('total_salary:', onespay.total_salary, '; Monthlymoney:', onespay)
@@ -470,12 +586,12 @@ def calchargeback(order, yeardef, monthdef):
     inf_message = '退单：' + order.order_number + '，此单尚未处理或为任务单，不进行退费'
     if order.status != 0:
         print(order, '是需要处理的订单')
+        onespay, created = Monthlymoney.objects.get_or_create(
+            month=datetime.date(yeardef, monthdef, 10),
+            whose_salary=order.whose_order,
+        )
         if order.calculated and (order.is_task_order is False):
             print('不是任务单，进行退费')
-            onespay, created = Monthlymoney.objects.get_or_create(
-                month=datetime.date(yeardef, monthdef, 10),
-                whose_salary=order.whose_order,
-            )
             if order.status == 1 or order.status == 2:
                 minus_money = order.money * order.commission_rate * 0.6
                 onespay.commission_minus += minus_money
@@ -484,14 +600,18 @@ def calchargeback(order, yeardef, monthdef):
                 minus_money = order.money * order.commission_rate
                 onespay.commission_minus += minus_money
                 inf_message = '退单：' + order.order_number + '，退全款，退单金额：' + str(minus_money)
-            onespay.save()
             print('onespay.commission_minus:',onespay.commission_minus, 'minus_money:', minus_money)
             # input('aaaaaaa')
+        else:
+            minus_money = 0
+        orderlist = [order.order_number, order.client_name, str(order.order_time), str(order.wedding_time), order.get_type_display(), format(order.money, '0.2f'), format(minus_money, '0.2f')]
+        onespay.details_back += ','.join(orderlist) + ';'
+        onespay.save()
     order.status = 4
     order.save()
     return inf_message
 
-
+@login_required
 def calculate(request):
     if request.method == 'GET':
         return HttpResponseRedirect(reverse('wage:index'))
@@ -524,8 +644,8 @@ def calculate(request):
         return render(request, 'wage/calculate.html',{
             'monthlymoney': monthlymoney,
             'inf_message': '没有新增订单，未重新计算，直接显示结果',
-            'month': month,
-            'year': year,
+            # 'month': month,
+            # 'year': year,
             'monthaccount': monthaccount,
             'yearaccount': yearaccount,
     })
@@ -536,13 +656,13 @@ def calculate(request):
     return render(request, 'wage/calculate.html', {
         'monthlymoney': monthlymoney,
         'inf_message': inf_message,
-        'month': month,
-        'year': year,
+        # 'month': month,
+        # 'year': year,
         'monthaccount': monthaccount,
         'yearaccount': yearaccount
     })
 
-
+@login_required
 def calculatebefore(request):
     if request.method == 'POST':
         taskorder = request.POST.getlist('taskorder')
@@ -567,25 +687,21 @@ def calculatebefore(request):
             print('================================')
     return HttpResponseRedirect(reverse('wage:index'))
 
-
-def checkresult(request):
-    return HttpResponse('aaaa')
-
-
+@login_required
 def findstatus(request):
     orderswed = Order.objects.filter(Q(wedding_time__month=monthaccount, wedding_time__year=yearaccount, status=1) | Q(wedding_time__lt=datetime.date(yearaccount, monthaccount, 1), calculated=True, status=1))
     return render(request, 'wage/findstatus.html', {'orderswed': orderswed})
 
-
+@login_required
 def findtask(request):
     ordersnew = Order.objects.filter(order_time__month=monthaccount, order_time__year=yearaccount, status__in=[1,2], calculated=False)
     return render(request, 'wage/findtask.html', {'ordersnew': ordersnew})
 
-
+@login_required
 def findchargeback(request):
-    return HttpResponse('cccccc')
+    return HttpResponse('目前计算退单请通过搜索功能')
 
-
+@login_required
 def changestatus(request):
     if request.method == 'POST':
         status2 = request.POST.getlist('status2')
@@ -598,7 +714,7 @@ def changestatus(request):
                 order.save()
     return HttpResponseRedirect(reverse('wage:index'))
 
-
+@login_required
 def changetask(request):
     if request.method == 'POST':
         taskorder = request.POST.getlist('taskorder')
@@ -629,7 +745,7 @@ def changetask(request):
             return HttpResponse('\n'.join(inf_order))
     return HttpResponseRedirect(reverse('wage:index'))
 
-
+@login_required
 def changechargeback(request):
     if request.method == 'POST':
         # chargeback = request.POST.get('chargeback')

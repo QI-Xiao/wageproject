@@ -11,6 +11,7 @@
 {% endblock %}
 
 {% block body %}
+<div class="container content">
 <br />
 <form action="{% url 'wage:search' %}" method="post">
     {% csrf_token %}
@@ -167,11 +168,6 @@
 {% csrf_token %}
     <button type="submit" name="calculate" class="btn btn-primary">计算金额</button>
 </form>
-
-<form action="{% url 'wage:checkresult' %}" method="post">
-{% csrf_token %}
-    <button type="submit" name="calculate" class="btn btn-primary">查看结果</button>
-</form>
 <br />
 
 <br />
@@ -195,4 +191,5 @@
     </div>
     <button type="submit" class="btn btn-default">导入</button>
 </form>
+</div>
 {% endblock %}

@@ -3,41 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>工资结算</title>
-<!-- 新 Bootstrap 核心 CSS 文件 -->
-<link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
 
-<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
-<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
 
-<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
-<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-{% block head %}
-{% endblock %}
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    {% block head %}
+    {% endblock %}
 
 </head>
 
 <body>
 {% block nocalendar %}
-<div class="calendar">
-  <div class="title">
-    显示月份
-    <a href="" id="prev"><span class="glyphicon glyphicon-triangle-left" aria-hidden="true"></span></a>
-    <span class="green" id="calendar-month">{{month}}</span>
-    <span class="green" id="calendar-year">{{year}}</span>
-    <a href="" id="next"><span class="glyphicon glyphicon-triangle-right" aria-hidden="true"></span></a>
-  </div>
+
+<div class="container">
+    <h4>订单月份
+        <a href="" id="prev"><span class="glyphicon glyphicon-triangle-left" aria-hidden="true"></span></a>
+        <span class="green" id="calendar-month">{{month}}</span>
+        <span class="green" id="calendar-year">{{year}}</span>
+        <a href="" id="next"><span class="glyphicon glyphicon-triangle-right" aria-hidden="true"></span></a>
+    </h4>
+    <h4>结算月份
+        <a href="" id="prev-account"><span class="glyphicon glyphicon-triangle-left" aria-hidden="true"></span></a>
+        <span class="green" id="account-month">{{monthaccount}}</span>
+        <span class="green" id="account-year">{{yearaccount}}</span>
+        <a href="" id="next-account"><span class="glyphicon glyphicon-triangle-right" aria-hidden="true"></span></a>
+    </h4>
 </div>
 
-<div class="calendar">
-  <div class="title">
-    结算月份
-    <a href="" id="prev-account"><span class="glyphicon glyphicon-triangle-left" aria-hidden="true"></span></a>
-    <span class="green" id="account-month">{{monthaccount}}</span>
-    <span class="green" id="account-year">{{yearaccount}}</span>
-    <a href="" id="next-account"><span class="glyphicon glyphicon-triangle-right" aria-hidden="true"></span></a>
-  </div>
-</div>
+
 {% block body %}
 {% endblock %}
 

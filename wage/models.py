@@ -71,6 +71,12 @@ class Monthlymoney(models.Model):
     commission_minus = models.FloatField(default=0, verbose_name='退单')
     other_salary = models.FloatField(default=0, verbose_name='额外调整')
     total_salary = models.FloatField(default=0, verbose_name='总金额')
+    details_task = models.TextField(default='', verbose_name='任务单明细')
+    details_new = models.TextField(default='', verbose_name='新增订单明细')
+    details_wed = models.TextField(default='', verbose_name='结婚订单明细')
+    details_teacher = models.TextField(default='', verbose_name='师父明细')
+    details_manager = models.TextField(default='', verbose_name='全店明细')
+    details_back = models.TextField(default='', verbose_name='退单明细')
 
     def __str__(self):
         return (

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 
 from . import views
 
@@ -11,7 +11,6 @@ urlpatterns = [
     path(r'calculate/<int:onemoney_id>/', views.detail, name='detail'),
     path(r'calculate/paymentoutput/', views.paymentoutput, name='paymentoutput'),
     path(r'calculatebefore/', views.calculatebefore, name='calculatebefore'),
-    path(r'checkresult/', views.checkresult, name='checkresult'),
     path(r'inputemployee/', views.inputemployee, name='inputemployee'),
     path(r'findstatus/', views.findstatus, name='findstatus'),
     path(r'findtask/', views.findtask, name='findtask'),
@@ -19,5 +18,4 @@ urlpatterns = [
     path(r'changestatus/', views.changestatus, name='changestatus'),
     path(r'changetask/', views.changetask, name='changetask'),
     path(r'changechargeback/', views.changechargeback, name='changechargeback'),
-
 ]
