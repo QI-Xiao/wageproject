@@ -20,7 +20,9 @@ function newDoc(elem){
 <h2>{{yearaccount}}年{{monthaccount}}月员工工资计算结果</h2>
 
 {% if inf_message %}
-    <h5>{{ inf_message }}</h5>
+    {% for inf in inf_message %}
+        <h5>{{ inf }}</h5>
+    {% endfor %}
 {% endif %}
 
 <div class="table-responsive">

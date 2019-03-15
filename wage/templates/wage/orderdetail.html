@@ -1,0 +1,65 @@
+{% extends 'wage/base.html' %}
+
+{% block nocalendar %}
+
+<h4>更换人员完成订单服务，只能选择订单尚未计算完毕的订单，即已付定金和已付尾款的订单</h4>
+
+{% if inf_message %}
+    <h5>{{ inf_message }}</h5>
+{% endif %}
+
+<form action="{% url 'wage:changeorderpeople' order.id %}" method="post">
+    {% csrf_token %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>顾客</th>
+                    <th>金额</th>
+                    <th>订单类型</th>
+                    <th>预定时间</th>
+                    <th>婚礼时间</th>
+                    <th>任务单</th>
+                    <th>订单状态</th>
+                    <th>订单接单店员</th>
+                    <th>完成服务店员</th>
+                    <th>选择完成服务店员</th>
+                    <th>订单号</th>
+                    <th>已被计入</th>
+                    <th>订单状态</th>
+                    <th>是否任务单</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>{{ order.client_name }}{% if order in ordersnew %} (本月新增){% endif %}</th>
+                    <th>{{ order.money }}</th>
+                    <th>{{ order.get_type_display }}</th>
+                    <th>{{ order.order_time }}</th>
+                    <th>{{ order.wedding_time }}</th>
+                    <th>{{ order.is_task_order }}</th>
+                    <th>{{ order.get_status_display }}</th>
+                    <th>{{ order.whose_new }}</th>
+                    <th>{{ order.whose_wed }}</th>
+                    <th>
+                        <select name="employee_id">
+                            {% for employee in employees %}
+                            <option value="{{ employee.id }}">{{ employee.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
+                    <th>{{ order.order_number }}</th>
+                    <th>{{ order.calculated }}</th>
+                    <th>{{ order.status }}</th>
+                    <th><input type="checkbox" name="taskorder" value="True" /></th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <button type="submit" class="btn btn-primary">确定修改</button>
+</form>
+
+<br />
+<a href="{% url 'wage:index' %}" class="btn btn-primary" role="button">返回首页</a>
+<a href="{% url 'wage:findorderpeople' %}" class="btn btn-default active" role="button">返回上一页</a>
+{% endblock %}

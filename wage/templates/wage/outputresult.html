@@ -5,10 +5,10 @@
     <title>Title</title>
 </head>
 <body>
-    图片生成成功<br />
+    结果生成成功<br />
     {% for output in output_url %}
         {{ output.0 }}
-        <a href="{{ output.1 }}" download>下载图片</a><br />
+        <a href="{{ output.1 }}" download>下载文件</a><br />
     {% endfor %}
     <br />
     <form action="{% url 'wage:index' %}" method="get">

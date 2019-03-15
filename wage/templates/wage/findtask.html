@@ -20,15 +20,13 @@
             <tr>
                 <th>顾客</th>
                 <th>金额</th>
-                <th>提成</th>
                 <th>订单类型</th>
                 <th>预定时间</th>
                 <th>婚礼时间</th>
                 <th>任务单</th>
-                <th>活动单</th>
-                <th>退单</th>
                 <th>订单状态</th>
-                <th>店员</th>
+                <th>订单接单店员</th>
+                <th>完成服务店员</th>
                 <th>订单号</th>
                 <th>已被计入</th>
                 <th>选择任务单</th>
@@ -39,15 +37,13 @@
             <tr>
                 <th>{{ order.client_name }}{% if order in ordersnew %} (本月新增){% endif %}</th>
                 <th>{{ order.money }}</th>
-                <th>{{ order.commission_rate }}</th>
                 <th>{{ order.get_type_display }}</th>
                 <th>{{ order.order_time }}</th>
                 <th>{{ order.wedding_time }}</th>
                 <th>{{ order.is_task_order }}</th>
-                <th>{{ order.is_discount_order }}</th>
-                <th>{{ order.is_chargeback }}</th>
                 <th>{{ order.get_status_display }}</th>
-                <th>{{ order.whose_order }}</th>
+                <th>{{ order.whose_new }}</th>
+                <th>{{ order.whose_wed }}</th>
                 <th>{{ order.order_number }}</th>
                 <th>{{ order.calculated }}</th>
                 <th>{% if not order.is_task_order %}<input type="checkbox" name="taskorder" value="{{ order.id }}" />{% endif %}</th>
@@ -56,6 +52,8 @@
         </tbody>
     </table>
 </div>
-    <button type="submit" class="btn btn-primary">下一步</button>
+    <button type="submit" class="btn btn-primary">更改任务单</button>
 </form>
+
+<a href="{% url 'wage:index' %}" class="btn btn-primary" role="button">返回</a>
 {% endblock %}

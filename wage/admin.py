@@ -9,7 +9,7 @@ class EmployeeAdmin(admin.ModelAdmin):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('client_name','money','type','order_time','wedding_time','is_task_order','status','whose_order','order_number','calculated')
+    list_display = ('client_name','money','type','order_time','wedding_time','is_task_order','status','order_number','calculated')# 'whose_order',
     list_filter = ['order_time','wedding_time']
 
 

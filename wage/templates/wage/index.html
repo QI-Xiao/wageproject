@@ -3,6 +3,10 @@
 {% block head %}
 
 <style type="text/css">
+tbody tr.unusual
+{
+background-color:MistyRose;
+}
 </style>
 
 <script>
@@ -39,33 +43,29 @@
             <tr>
                 <th>顾客</th>
                 <th>金额</th>
-                <th>提成</th>
+                <th>接单提点</th>
                 <th>订单类型</th>
                 <th>预定时间</th>
                 <th>婚礼时间</th>
                 <th>任务单</th>
-                <th>活动单</th>
-                <th>退单</th>
                 <th>订单状态</th>
-                <th>店员</th>
+                <th>订单接单店员</th>
                 <th>订单号</th>
                 <th>已被计入</th>
             </tr>
         </thead>
         <tbody>
         {% for order in ordersnew %}
-            <tr>
+            {% if order.unusual_change %}<tr style="color:red">{% else %}<tr>{% endif %} <!--<tr class="unusual">-->
                 <th>{{ order.client_name }}{% if order in orderswed %} (本月结婚){% endif %}</th>
                 <th>{{ order.money }}</th>
-                <th>{{ order.commission_rate }}</th>
+                <th>{{ order.commission_rate_new }}</th>
                 <th>{{ order.get_type_display }}</th>
                 <th>{{ order.order_time }}</th>
                 <th>{{ order.wedding_time }}</th>
                 <th>{{ order.is_task_order }}</th>
-                <th>{{ order.is_discount_order }}</th>
-                <th>{{ order.is_chargeback }}</th>
                 <th>{{ order.get_status_display }}{% if order.chargeback_date and order.status != 4 %} (待退款){% endif %}</th>
-                <th>{{ order.whose_order }}</th>
+                <th>{{ order.whose_new }}</th>
                 <th>{{ order.order_number }}</th>
                 <th>{{ order.calculated }}</th>
             </tr>
@@ -81,33 +81,29 @@
             <tr>
                 <th>顾客</th>
                 <th>金额</th>
-                <th>提成</th>
+                <th>完成提点</th>
                 <th>订单类型</th>
                 <th>预定时间</th>
                 <th>婚礼时间</th>
                 <th>任务单</th>
-                <th>活动单</th>
-                <th>退单</th>
                 <th>订单状态</th>
-                <th>店员</th>
+                <th>完成服务店员</th>
                 <th>订单号</th>
                 <th>已被计入</th>
             </tr>
         </thead>
         <tbody>
         {% for order in orderswed %}
-            <tr>
+            {% if order.unusual_change %}<tr style="color:red">{% else %}<tr>{% endif %} <!--<tr class="unusual">-->
                 <th>{{ order.client_name }}{% if order in ordersnew %} (本月新增){% endif %}</th>
                 <th>{{ order.money }}</th>
-                <th>{{ order.commission_rate }}</th>
+                <th>{{ order.commission_rate_wed }}</th>
                 <th>{{ order.get_type_display }}</th>
                 <th>{{ order.order_time }}</th>
                 <th>{{ order.wedding_time }}</th>
                 <th>{{ order.is_task_order }}</th>
-                <th>{{ order.is_discount_order }}</th>
-                <th>{{ order.is_chargeback }}</th>
                 <th>{{ order.get_status_display }}{% if order.chargeback_date and order.status != 4 %} (待退款){% endif %}</th>
-                <th>{{ order.whose_order }}</th>
+                <th>{{ order.whose_wed }}</th>
                 <th>{{ order.order_number }}</th>
                 <th>{{ order.calculated }}</th>
             </tr>
@@ -128,8 +124,6 @@
                 <th>预定时间</th>
                 <th>婚礼时间</th>
                 <th>任务单</th>
-                <th>活动单</th>
-                <th>退单</th>
                 <th>订单状态</th>
                 <th>店员</th>
                 <th>订单号</th>
@@ -146,8 +140,6 @@
                 <th>{{ order.order_time }}</th>
                 <th>{{ order.wedding_time }}</th>
                 <th>{{ order.is_task_order }}</th>
-                <th>{{ order.is_discount_order }}</th>
-                <th>{{ order.is_chargeback }}</th>
                 <th>{{ order.get_status_display }}{% if order.chargeback_date and order.status != 4 %} (待退款){% endif %}</th>
                 <th>{{ order.whose_order }}</th>
                 <th>{{ order.order_number }}</th>
@@ -160,17 +152,21 @@
 
 <a href="{% url 'wage:findstatus' %}" class="btn btn-primary" role="button">选择已付尾款</a>
 <a href="{% url 'wage:findtask' %}" class="btn btn-primary" role="button">选择任务单</a>
-<a href="{% url 'wage:findchargeback' %}" class="btn btn-default active" role="button">选择退单</a>
+<a href="{% url 'wage:findorderpeople' %}" class="btn btn-default active" role="button">换人完成服务</a>
 
 <br />
 <br />
 <form action="{% url 'wage:calculate' %}" method="post">
 {% csrf_token %}
-    <button type="submit" name="calculate" class="btn btn-primary">计算金额</button>
+    <button type="submit" name="calculate" class="btn btn-primary">计算{{monthaccount}}月金额</button>
 </form>
-<br />
-
-<br />
+<br /><br />
+<form action="{% url 'wage:calculateagain' %}" method="post">
+{% csrf_token %}
+    <button type="submit" name="calculate" class="btn btn-primary">重置{{monthaccount}}月订单</button>
+</form>
+    <h4>重置操作后，会重置当月所有还没有计算的记录，包括退单、任务单和已付尾款的记录，同时重置当月计算过的新订单、完成服务订单和退单，但不会对其它月份的计算结果造成影响</h4>
+<br /><br />
 
 <form enctype="multipart/form-data" action="{% url 'wage:inputorder' %}" method="post">
     {% csrf_token %}
