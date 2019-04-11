@@ -19,6 +19,8 @@ urlpatterns = [
     path(r'findorderpeople/<int:order_id>/change', views.changeorderpeople, name='changeorderpeople'),
     path(r'changestatus/', views.changestatus, name='changestatus'),
     path(r'changetask/', views.changetask, name='changetask'),
+    path(r'findothermoney/', views.findothermoney, name='findothermoney'),
+    path(r'changeothermoney/', views.changeothermoney, name='changeothermoney'),
     path(r'changechargeback/', views.changechargeback, name='changechargeback'),
     path(r'calculateagain/', views.calculateagain, name='calculateagain'),
 ]

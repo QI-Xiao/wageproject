@@ -1,0 +1,42 @@
+{% extends 'wage/base.html' %}
+
+{% block head %}
+<style type="text/css">
+</style>
+
+<script>
+</script>
+
+{% endblock %}
+
+{% block nocalendar %}
+<div class="container content">
+    <h4>确定是否需要额外调整</h4>
+
+    <form action="{% url 'wage:changeothermoney' %}" method="post">
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table-bordered">
+                <thead>
+                    <tr>
+                        <th>店员</th>
+                        <th>额外调整金额</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for employee in employees %}
+                    <tr>
+                        <th>{{ employee.name }}</th>
+                        <th><input type="text" name="{{employee.name}}" class="btn"></th>
+                        <th><input type="text" name="{{employee.name}}备和注" class="btn"></th>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <br /><button type="submit" class="btn btn-primary">额外调整至{{monthaccount}}月</button>
+    </form>
+    <br/><a href="{% url 'wage:index' %}" class="btn btn-primary" role="button">返回</a>
+</div>
+{% endblock %}

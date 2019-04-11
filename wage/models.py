@@ -88,6 +88,7 @@ class Monthlymoney(models.Model):
     details_teacher = models.TextField(default='', verbose_name='师父明细')
     details_manager = models.TextField(default='', verbose_name='全店明细')
     details_back = models.TextField(default='', verbose_name='退单明细')
+    other_salary_remark = models.TextField('额外调整明细', default='')
 
     def __str__(self):
         return (

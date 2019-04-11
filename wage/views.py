@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse, reverse, get_object_or_404
+from django.shortcuts import render, HttpResponse, reverse, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.db.models import Q, Sum, F
@@ -219,7 +219,7 @@ def inputemployee(request):
                 inf_message.append('员工姓名：' + name + '写入成功')
             else:
                 print('员工已存在')
-                inf_message.append('员工姓名：'+ name + ' error：员工已存在')
+                inf_message.append('员工姓名：' + name + ' error：员工已存在')
                 continue
             print()
         return render(request, 'wage/inputresult.html', {'inf_message': inf_message})
@@ -365,7 +365,7 @@ def createjpg(itemlists, path):
     draw.text((width_now, height_now), '基础底薪', color, font)
     draw.text((800, height_now), itemlists['base_pay'], color, font)
     height_now += 46 + font.size
-    draw.text((width_now, height_now), '额外调整', color, font)
+    draw.text((width_now, height_now), '额外调整 ' + itemlists['other_salary_remark'], color, font)
     draw.text((800, height_now), itemlists['other_salary'], color, font)
     height_now += 46 + font.size
     draw.line(((58, height_now), (1060, height_now)), (0, 0, 0), width=5)
@@ -378,8 +378,10 @@ def paymentoutput(request):
     if request.method == "POST":
         money_lists = [['店员', '底薪', '完成任务单', '总任务单', '当月订单提成', '完成服务提成', '传帮带提成', '全店提成', '退单扣减', '额外调整', '总金额']]
         year_month = str(yearaccount)+'年'+str(monthaccount)+'月'
-        path = mkdir(settings.MEDIA_ROOT + year_month + '/')
-        outputpath = settings.MEDIA_URL + year_month + '/'
+        time_now = datetime.datetime.now()
+        year_month_now = year_month + str(time_now.day) + '日' + time_now.strftime('%H-%M-%S')
+        path = mkdir(settings.MEDIA_ROOT + year_month_now + '/')
+        outputpath = settings.MEDIA_URL + year_month_now + '/'
         output_url = []
         for employee in Employee.objects.filter(on_job=True):
             money = employee.monthlymoney_set.get(month=datetime.date(yearaccount, monthaccount, 10))
@@ -394,6 +396,7 @@ def paymentoutput(request):
                          'chargeback_order':[i.split(',') for i in money.details_back.split(';') if i],
                          'base_pay':format(money.base_salary,'.2f'),
                          'other_salary':format(money.other_salary,'.2f'),
+                         'other_salary_remark': money.other_salary_remark,
                          'total_salary':format(money.total_salary,'.2f')
                          }
             print(itemlists)
@@ -402,6 +405,7 @@ def paymentoutput(request):
 
         writeexcel(money_lists, path + year_month + '工资总表' + '.xls')
         output_url.append([year_month +'工资总表', outputpath + year_month + '工资总表' + '.xls'])
+        # print('output_url', output_url)
         return render(request, 'wage/outputresult.html', {'output_url': output_url})
     return HttpResponseRedirect(reverse('wage:index'))
 
@@ -428,16 +432,17 @@ def search(request):
             order_matched.append(order)
             print('找到符合要求的：',order)
     if order_matched:
-        return render(request, 'wage/search.html', {'order_matched':order_matched})
+        return render(request, 'wage/search.html', {'order_matched':order_matched, 'monthaccount':monthaccount})
     return render(request, 'wage/search.html', {'inf_message': '没有结果'})
 
 @login_required
 def index(request):
     getdate(request)
+    status = request.GET.get('status')
     ordersnew = Order.objects.filter(order_time__month=month, order_time__year=year).order_by("-is_task_order","order_time", "wedding_time")
     orderswed = Order.objects.filter(wedding_time__month=month, wedding_time__year=year).order_by("order_time", "wedding_time")
     orderchanged = Order.objects.exclude(id__in=ordersnew).exclude(id__in=orderswed).filter(chargeback_date__month=month, chargeback_date__year=year).order_by("order_time", "wedding_time")
-    print('year,month:', year, month)
+    print('year,month:', year, month, 'status', status)
     # ordersssss = Order.objects.filter(whose_wed= F(whose_new))
 
     # Order.objects.all().update(chargeback_date=None, status=1,calculated=False,orderfinish_date=None, is_task_order=False)
@@ -450,7 +455,7 @@ def index(request):
     # for employee in employees:
     #     employee.task_quantity = random.randint(1,3)
     #     employee.save()
-    return render(request, 'wage/index.html', {'ordersnew':ordersnew, 'orderswed':orderswed, 'orderchanged':orderchanged, 'month':month, 'year':year, 'monthaccount':monthaccount, 'yearaccount':yearaccount})
+    return render(request, 'wage/index.html', {'ordersnew':ordersnew, 'orderswed':orderswed, 'orderchanged':orderchanged, 'month':month, 'year':year, 'monthaccount':monthaccount, 'yearaccount':yearaccount, 'status': status})
 
 
 def calwedtask(orderswedtask, yeardef, monthdef):
@@ -579,13 +584,6 @@ def calonespay(yeardef, monthdef):
                     teacherget_money = studentpay_money * super_rate
                     onespay.commission_passive += teacherget_money
                     onespay.details_teacher += ','.join([student.name, format(studentpay_money, '0.2f'), format(teacherget_money, '0.2f')]) + ';'
-                    # print('super_rate:', super_rate, 'studentpay_money:', studentpay_money)
-                    # print('studentpay.commission_current', studentpay.commission_current)
-                    # print('studentpay.commission_before',studentpay.commission_before)
-                    # print('studentpay.commission_passive', studentpay.commission_passive)
-                    # print('student:', student)
-                    # print('************************************')
-                    # input('aaaaaaaaaa')
                 onespay.save()
                 print('月薪：', onespay.whose_salary, onespay.commission_current, onespay.commission_before, onespay.commission_passive, onespay.commission_minus)
                 # input('bbbbbbbbbbbbb')
@@ -612,7 +610,12 @@ def calonespay(yeardef, monthdef):
                         manager_rate = float(val)
                     else:
                         break
-                onespay.commission_shop_manager = manager_rate * monthly_turnover
+                # 方法1，用阶梯提点来算
+                # onespay.commission_shop_manager = manager_rate * monthly_turnover
+
+                # 方法2，用阶梯固定金额来算
+                onespay.commission_shop_manager = manager_rate
+
             onespay.details_manager = ','.join([format(monthly_turnover, '0.2f'), format(onespay.commission_shop_manager, '0.2f')]) + ';'
         onespay.total_salary = onespay.base_salary + onespay.commission_current + onespay.commission_before + onespay.commission_passive + onespay.commission_shop_manager - onespay.commission_minus + onespay.other_salary
         onespay.save()
@@ -734,8 +737,6 @@ def calculatebefore(request):
         for i in taskorder:
             print('循环')
             order = Order.objects.get(id=i)
-            # if order.type == 5:
-            #     return render(request, 'wage/inputresult.html', {'inf_message': ['订单：'+order.order_number+'，类型为升级，不可为任务单。']})
             order.is_task_order = True
             order.commission_rate_new = 0
             order.commission_rate_wed = 0
@@ -750,15 +751,9 @@ def calculatebefore(request):
             for order in ordersbefore.filter(order_time__month=monthdef, order_time__year=yeardef):
                 calordernew(order, yeardef, monthdef, consider_task=order.is_task_order)
             calonespay(yeardef, monthdef)
-        # for order in ordersbefore:
-        #     print('获得年份')
-        #     yeardef = order.order_time.year
-        #     monthdef = order.order_time.month
-        #     print('yeardef', yeardef, 'monthdef', monthdef)
-        #     calordernew(order, yeardef, monthdef, consider_task=order.is_task_order)
-        #     calonespay(yeardef, monthdef)
-        #     print('================================')
-    return HttpResponseRedirect(reverse('wage:index'))
+    response = redirect('wage:index')
+    response['Location'] += '?status=1'
+    return response
 
 @login_required
 def findstatus(request):
@@ -771,7 +766,7 @@ def changestatus(request):
         status2 = request.POST.getlist('status2')
         for i in status2:
             order = Order.objects.get(id=i)
-            if order.status == 1:
+            if order.status == 1 and not order.chargeback_date:
                 order.status = 2
                 order.orderfinish_date = datetime.date(yearaccount, monthaccount, dayaccount)
                 order.save()
@@ -791,7 +786,7 @@ def changetask(request):
         for i in taskorder:
             print('循环')
             order = Order.objects.get(id=i)
-            if order.is_task_order:
+            if order.is_task_order or order.chargeback_date:
                 continue
             order.commission_rate_new = 0
             order.is_task_order = True
@@ -817,9 +812,37 @@ def changetask(request):
     return HttpResponseRedirect(reverse('wage:index'))
 
 @login_required
+def findothermoney(request):
+    employees = Employee.objects.filter(on_job=True).order_by('name')
+    return render(request, 'wage/findothermoney.html', {'employees': employees, 'monthaccount':monthaccount})
+
+@login_required
+def changeothermoney(request):
+    if request.method == 'POST':
+        inf_message = []
+        for name, data in request.POST.items():
+            if name == 'csrfmiddlewaretoken' or '备和注' in name:
+                continue
+            if data != '':
+                try:
+                    moneychage = float(data)
+                    employee = Employee.objects.get(name=name)
+                except:
+                    inf_message.append('员工：' + name + '，输入有误：' + data + '，请检查')
+                else:
+                    money, cr = employee.monthlymoney_set.get_or_create(month=datetime.date(yearaccount, monthaccount, 10))
+                    money.other_salary = moneychage
+                    money.other_salary_remark = request.POST.get(name+'备和注').strip()
+                    money.save()
+                    print(money.other_salary, money.other_salary_remark)
+
+        if inf_message:
+            return render(request, 'wage/inputresult.html', {'inf_message': inf_message})
+    return HttpResponseRedirect(reverse('wage:index'))
+
+@login_required
 def changechargeback(request):
     if request.method == 'POST':
-        # chargeback = request.POST.get('chargeback')
         chargeback = request.POST.getlist('chargeback')
         for back in chargeback:
             order = Order.objects.get(order_number=back)

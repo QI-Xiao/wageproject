@@ -42,12 +42,12 @@
                 <th>{{ order.order_time }}</th>
                 <th>{{ order.wedding_time }}</th>
                 <th>{{ order.is_task_order }}</th>
-                <th>{{ order.get_status_display }}</th>
+                <th>{{ order.get_status_display }}{% if order.chargeback_date %} (待退款){% endif %}</th>
                 <th>{{ order.whose_new }}</th>
                 <th>{{ order.whose_wed }}</th>
                 <th>{{ order.order_number }}</th>
                 <th>{{ order.calculated }}</th>
-                <th>{% if order.status == 1 %}<input type="checkbox" name="status2" value="{{ order.id }}" />{% else %}<input type="checkbox" disabled/>{% endif %}</th>
+                <th>{% if order.status == 1 and not order.chargeback_date %}<input type="checkbox" name="status2" value="{{ order.id }}" />{% else %}<input type="checkbox" disabled/>{% endif %}</th>
             </tr>
         {% endfor %}
         </tbody>

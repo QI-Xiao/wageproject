@@ -32,10 +32,6 @@ background-color:MistyRose;
 <br />
 <br />
 
-<br />
-<br />
-<br />
-
 <h4>本月新增订单</h4>
 <div class="table-responsive">
     <table class="table table-striped">
@@ -150,12 +146,14 @@ background-color:MistyRose;
     </table>
 </div>
 
-<a href="{% url 'wage:findstatus' %}" class="btn btn-primary" role="button">选择已付尾款</a>
+<a href="{% url 'wage:findstatus' %}" class="btn btn-primary" role="button">选择完成服务</a>
 <a href="{% url 'wage:findtask' %}" class="btn btn-primary" role="button">选择任务单</a>
+<a href="{% url 'wage:findothermoney' %}" class="btn btn-primary" role="button">额外调整</a>
 <a href="{% url 'wage:findorderpeople' %}" class="btn btn-default active" role="button">换人完成服务</a>
 
 <br />
 <br />
+    {% if status == '1' %}<h4 style="color:red">完成往月遗漏订单的计算，尚未计算本月工资</h4>{% endif %}
 <form action="{% url 'wage:calculate' %}" method="post">
 {% csrf_token %}
     <button type="submit" name="calculate" class="btn btn-primary">计算{{monthaccount}}月金额</button>
